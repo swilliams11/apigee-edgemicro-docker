@@ -3,13 +3,13 @@ kind: Service
 metadata:
   name: edge-microgateway
   labels:
-    app: edge-microgateway 
+    app: edge-microgateway
 spec:
   ports:
   - port: 8000
     name: http
   selector:
-    app: edge-microgatewy 
+    app: edge-microgatewy
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: edge-microgateway
-          image: gcr.io/nandanks-151422/microgteway:latest 
+          image: gcr.io/YOUR_PROJECT_ID_HERE/microgateway:latest
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 8000
