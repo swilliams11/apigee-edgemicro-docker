@@ -1,0 +1,70 @@
+{
+    "version": "1.0",
+    "envConfig": {
+        "test": {
+          "targetServers": [
+          ],
+          "caches": [
+          ],
+          "kvms": [
+          ]
+        },
+        "prod": {
+          "targetServers": [
+          ],
+          "caches": [
+          ],
+          "kvms": [
+          ]
+        }
+    },
+    "orgConfig": {
+        "apiProducts": [
+            {
+                "name": "edgemicro_performance_product",
+                "apiResources": [
+                    "/"
+                ],
+                "approvalType": "auto",
+                "attributes": [
+                    {
+                        "name": "description",
+                        "value": "Edgemicro performance product"
+                    }
+                ],
+                "description": "",
+                "displayName": "edgemicro_performance_product",
+                "environments": [
+                    "test",
+                    "prod"
+                ],
+                "proxies": [
+                    "edgemicro_performancetest"
+                ],
+                "quota": "10000",
+                "quotaInterval": "1",
+                "quotaTimeUnit": "month",
+                "scopes": []
+            }
+        ],
+        "developers": [
+            {
+                "email": "edgemicro_performancetest@example.com",
+                "firstName": "Edgemicro",
+                "lastName": "Performance",
+                "userName": "edgemicro_performancetest@example.com",
+                "attributes": []
+            }
+        ],
+        "developerApps": {
+            "edgemicro_performancetest@example.com": [
+                {
+                    "name": "edgemicro_performance_app",
+                    "apiProducts": [ "edgemicro_performance_product" ],
+                    "callbackUrl": "",
+                    "scopes": []
+                }
+            ]
+        }
+    }
+}
