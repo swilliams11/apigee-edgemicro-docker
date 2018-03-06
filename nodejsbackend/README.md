@@ -38,6 +38,12 @@ npm start
 
 ## Test
 ```
-curl http:IP:9000/10kb
-curl http:IP:9000/100kb
+curl http:IP:8080/10kb
+curl http:IP:8080/100kb
+```
+
+
+## Clean Up
+```
+kubectl delete -f nodebackend.yaml
 ```

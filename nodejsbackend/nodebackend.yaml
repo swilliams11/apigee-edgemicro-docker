@@ -6,27 +6,24 @@ metadata:
     app: nodejs-backend
 spec:
   ports:
-  - port: 9000
+  - port: 8080
     name: http
   selector:
     app: nodejs-backend
   type: LoadBalancer
 ---
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: nodejs-backend
+  labels:
+    app: nodejs-backend
 spec:
-  replicas: 2
-  template:
-    metadata:
-      labels:
-        name: nodejs-backend
-    spec:
-      containers:
-        - name: nodejs-backend
-          image: gcr.io/YOUR_PROJECT_ID_HERE/nodejs-backend:latest
-          imagePullPolicy: IfNotPresent
-          ports:
-          - containerPort: 9000
+  restartPolicy: Never
+  containers:
+    - name: nodejs-backend
+      image: gcr.io/YOUR_PROJECT_ID_HERE/nodejs-backend:latest
+      ports:
+        - containerPort: 8080
+
 ---
