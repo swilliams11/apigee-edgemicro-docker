@@ -1,6 +1,12 @@
 # Apigee Edge Microgateway on Docker & Kubernetes
 This project describes how you can deploy Apigee Edge Microgateway on Kubernetes in GCP.
 
+This repository has:
+* nodejs backend that you can deploy to K8S
+* edgemicro proxy that you can use to test edgemicro
+* TODO - Jmeter tests
+* TODO - Gatling tests
+
 ### Prerequisites
 1. Docker
 Please refer to this page to install docker in your machine
