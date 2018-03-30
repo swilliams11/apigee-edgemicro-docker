@@ -1,0 +1,5 @@
+.idea
+target
+gatling-debug.log
+gatling.log
+.DS_Store

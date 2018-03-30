@@ -38,8 +38,8 @@ npm start
 
 ## Test
 ```
-curl http:IP:8080/10kb
-curl http:IP:8080/100kb
+curl http://IP:8080/10kb
+curl http://IP:8080/100kb
 ```
 
 
