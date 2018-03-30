@@ -1,4 +1,4 @@
 testcaseid,testcasedescription,servername,port,path,execute,assertheader,assertcontent,env
-Edgemicro-1-1,GET 10KB,IP.9,8000,/edgemicro_perftest/10kb,Y,HTTP/1.1 200 OK,city,test
+Edgemicro-1-1,GET 10KB,IP,8000,/edgemicro_perftest/10kb,Y,HTTP/1.1 200 OK,city,test
 Edgemicro-1-2,GET 10KB,IP,8000,/edgemicro_perftest/10kb,Y,HTTP/1.1 200 OK,city,test
 Edgemicro-1-3,GET 10KB,IP,8000,/edgemicro_perftest/10kb,Y,HTTP/1.1 200 OK,city,test
