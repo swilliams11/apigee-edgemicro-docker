@@ -1,2 +1,2 @@
 #!/bin/bash
-kubectl delete service microgateway; kubectl delete deployment microgateway 
+kubectl delete service edge-microgateway; kubectl delete deployment edge-microgateway 

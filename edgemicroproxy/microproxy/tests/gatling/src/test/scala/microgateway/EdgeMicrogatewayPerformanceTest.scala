@@ -10,21 +10,28 @@ import scala.concurrent.duration._
 import scala.util.Random
 
 
-class EdgeMicrogatewayPerformanceTest extends Simulation {
+object EdgeMicrogatewayPerformanceTest extends Simulation {
   //fetch values from application.conf file
   val apigeeMicrogatewayDomain = ConfigFactory.load().getString("apigee-conf.apigee-microgateway-domain")
   val apigeeMicrogatewayPort = ConfigFactory.load().getString("apigee-conf.apigee-microgateway-port")
+  val apigeeApikey = ConfigFactory.load().getString("apigee-conf.apigee-apikey")
+  val apigeeSecret = ConfigFactory.load().getString("apigee-conf.apigee-secret")
+  val apigeeOrg = ConfigFactory.load().getString("apigee-conf.apigee-org")
+  val apigeeEnv = ConfigFactory.load().getString("apigee-conf.apigee-env")
   val atOnceUsersConfig = ConfigFactory.load().getInt("gatling-conf.at-once-users")
   val constantUsersPerSecConfig = ConfigFactory.load().getInt("gatling-conf.constant-users-per-sec")
   val durationConfig = ConfigFactory.load().getInt("gatling-conf.duration")
-
-
+  val jwt = null
   /**
     * Create the domain name as a string
     * @return
     */
   def getDomain(): String = {
     return "http://" + apigeeMicrogatewayDomain + ":" + apigeeMicrogatewayPort
+  }
+
+  def getApigeeTokenDomain(): String = {
+    return "https://" + apigeeOrg + "-" + apigeeEnv + ".apigee.net"
   }
 
   //configure the http object base url generically.
@@ -35,42 +42,68 @@ class EdgeMicrogatewayPerformanceTest extends Simulation {
     * This object sends two requests to random endpoints.
     * Each user is has its own Hello object that it executes.
     */
-  object PerformanceTest10KB {
+  object PerformanceTest10kbAccessToken {
 
+    /*exec {
+      session => session.set("auth", "")
+
+    }*/
     val get10KBRequest = {
-      exec(http("10KB Get Request 1").get(getDomain() + "/edgemicro_perftest/10kb"))
-        .pause(250 milliseconds)
-    }
+      //doIfEqualsOrElse(session => session("auth").as[String], "") {
+      //print("auth value not found in session")
+      exec(
+        http("oauth token request").post(getApigeeTokenDomain() + "/edgemicro-auth/token")
+          //.header("Content-type", "application/json")
+          .body(
+            StringBody("""{"client_id": """" + apigeeApikey + """","client_secret":"""" + apigeeSecret + """","grant_type": "client_credentials" }""")
+          ).asJSON
+          .check(jsonPath("$.token").find.saveAs("auth"))
+      ).pause(100 milliseconds).exec(
+        repeat(100, "i"){
+          //this line labels each request independently
+          //exec(http("10KB Get Request ${i}").get(getDomain() + "/edgemicro_perftest/10kb")
+          exec(http("10KB Get Request").get(getDomain() + "/edgemicro_perftest/10kb")
+              //.header("x-api-key", apigeeApikey)
+              .header("Authorization", "Bearer ${auth}")
+          )
+        }
+      )
 
-    val get10KBRequest2 = {
-      exec(http("10KB Get Request 2").get(getDomain() + "/edgemicro_perftest/10kb"))
-        .pause(250 milliseconds)
+
+     /* } {
+          print("auth value found in session")
+          exec(http("10KB Get Request 1").get(getDomain() + "/edgemicro_perftest/10kb")
+            .header("x-api-key", apigeeApikey)
+            .header("Authorization", "Bearer ${auth}")
+          )
+            .pause(250 milliseconds)
+
+        }*/
+
     }
   }
 
-  object PerformanceTest100KB {
+  object PerformanceTest100kbAccessToken {
 
     val get100KBRequest = {
-      exec(http("100kb Get Request 1").get(getDomain() + "/edgemicro_perftest/100kb"))
-        .pause(250 milliseconds)
-    }
-
-    val get100KBRequest2 = {
-      exec(http("100kb Get Request 2").get(getDomain() + "/edgemicro_perftest/100kb"))
-        .pause(250 milliseconds)
+      exec(
+        http("oauth token request").post(getApigeeTokenDomain() + "/edgemicro-auth/token")
+          //.header("Content-type", "application/json")
+          .body(
+          StringBody("""{"client_id": """" + apigeeApikey + """","client_secret":"""" + apigeeSecret + """","grant_type": "client_credentials" }""")
+        ).asJSON
+          .check(jsonPath("$.token").find.saveAs("auth"))
+      ).pause(100 milliseconds).exec(
+        repeat(100, "i"){
+          //this line labels each request independently
+          //exec(http("100KB Get Request ${i}").get(getDomain() + "/edgemicro_perftest/100kb")
+          exec(http("100KB Get Request").get(getDomain() + "/edgemicro_perftest/100kb")
+            //.header("x-api-key", apigeeApikey)
+            .header("Authorization", "Bearer ${auth}")
+          )
+        }
+      )
     }
   }
-
-  val scn = scenario("10kb Performance Test Scenario").exec(PerformanceTest10KB.get10KBRequest, PerformanceTest10KB.get10KBRequest2) // A scenario is a chain of requests and pauses
-
-  /*
-  This setup is in terms of number of concurrent users.
-  We don't know with this model the total number of requests per sec
-   */
-  setUp(
-    scn.inject(
-      atOnceUsers(atOnceUsersConfig),
-      constantUsersPerSec(constantUsersPerSecConfig) during(durationConfig minutes)
-    ).protocols(httpConf))
 
 }

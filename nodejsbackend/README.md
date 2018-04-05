@@ -25,7 +25,20 @@ kubectl create -f nodebackend.yaml --validate=true --dry-run=false
 
 3. get the IP for the service and test it
 
-```kubectl get svc
+```
+kubectl get svc
+```
+
+## Scale
+
+### Scale Up
+```
+kubectl scale --current-replicas=2 --replicas=3 rc/nodejs-backend
+```
+
+### Scale Down
+```
+kubectl scale --replicas=2 rc/nodejs-backend
 ```
 
 ## Run locally

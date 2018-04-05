@@ -2,10 +2,10 @@
 This project describes how you can deploy Apigee Edge Microgateway on Kubernetes in GCP.
 
 This repository has:
-* nodejs backend that you can deploy to K8S
-* edgemicro proxy that you can use to test edgemicro
-* TODO - Jmeter tests
-* TODO - Gatling tests
+* [nodejs backend](nodejsbackend) that you can deploy to K8S
+* [edgemicro proxy](edgemicroproxy) that you can use to test edgemicro
+* [Jmeter tests](edgemicroproxy/microproxy/tests/jmeter)
+* [Gatling tests](edgemicroproxy/microproxy/tests/gatling)
 
 ### Prerequisites
 1. Docker
@@ -13,7 +13,8 @@ Please refer to this page to install docker in your machine
 https://www.docker.com/products/docker-toolbox
 
 ### Prerequisites
-[outside of docker]
+Perform these steps outside of docker.  
+
 1. Install Edge microgateway
 ```
 npm install -g edgemicro
@@ -59,6 +60,21 @@ docker images
 7. To start docker
 ```
 docker run -d -p 8000:8000 -e EDGEMICRO_ORG="your-orgname" -e EDGEMICRO_ENV="your-env" -e EDGEMICRO_KEY="bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2" -e  EDGEMICRO_SECRET="exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0" -P -it microgateway
+```
+
+#### microgateway-no-oauth Docker image
+I created a microgateway-no-oauth Docker image by removing the `oauth` plugin from the sequence in the org-env-config.yaml file.
+
+1. Copy the {org}-{env}-config.yaml to the current folder (from pre-reqs). Edit the Dockerfile with the correct file name. and remove the `oauth` plugin from the sequence.  
+
+2. Build the docker image using following command:
+```
+docker build --build-arg ORG="your-orgname" --build-arg ENV="your-env" --build-arg KEY="bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2" --build-arg SECRET="exxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx0" -t microgateway-no-oauth .
+```
+
+3. This will create a image apigee-edgemicro and you can see the images using command:
+```
+docker images
 ```
 
 ### Operationalizing Edge Microgateway (MG)
@@ -118,10 +134,17 @@ gcloud container clusters get-credentials microgatewaycluster1
 
 ```
 
-#### Tag the docker image
+#### Tag the Docker image
 
 ```
 docker tag microgateway gcr.io/$PROJECT_ID/microgteway:latest
+```
+
+##### Tag the microgateway-no-oauth Docker image
+You only need to do this if you created a separate Docker image that does not include the oauth plugin.  
+
+```
+docker tag microgateway gcr.io/$PROJECT_ID/microgteway-no-oauth:latest
 ```
 
 #### Convert Edge Microgateway credentials to base64
@@ -143,6 +166,8 @@ In order for Kubernetes to start the MG container, it should be accessible via a
 
 ```
 gcloud docker -- push gcr.io/$PROJECT_ID/microgateway:latest
+
+gcloud docker -- push gcr.io/$PROJECT_ID/microgateway-no-oauth:latest
 ```
 
 3. Check that your container was uploaded successfully.
@@ -154,6 +179,7 @@ Console
 ```
 NAME
 gcr.io/YOUR_GCP_PROJECT_ID/microgateway
+gcr.io/YOUR_GCP_PROJECT_ID/microgateway-no-oauth
 Only listing images in gcr.io/YOUR_GCP_PROJECT_ID. Use --repository to list images in other repositories.
 ```
 
@@ -161,6 +187,12 @@ Only listing images in gcr.io/YOUR_GCP_PROJECT_ID. Use --repository to list imag
 https://cloud.google.com/container-registry/docs/advanced-authentication
 https://github.com/GoogleCloudPlatform/docker-credential-gcr
 
+#### K8S YAML configurations
+There are three mgw-secret*.yaml files.
+1. mgw-secret.yaml - which has the secured version of microgateway (oauth plugin included in the sequence).
+  This file includes a deployment so that you can scale MG up or down accordingly.
+2. mgw-secret.pod.yaml - which is the original version of this file with a K8S pod included
+3. mgw-secret-no-oauth.yaml - which includes the microgateway-no-oauth docker image that allows all requests to go through.
 
 #### Sample Configuration
 
@@ -226,8 +258,17 @@ spec:
 ```
 
 Create the resources. This will create the K8S secrets, the Pod with Microgateway running on it and the load-balancer service so that it is publicly accessible.  
+
 ```
 kubectl create -f mgw-secret.yaml --validate=true --dry-run=false
+kubectl create -f mgw-secret-no-oauth.yaml --validate=true --dry-run=false
+```
+
+#### Scale the deployment
+
+```
+kubectl scale --current-replicas=2 --replicas=3 deployment/edge-microgateway
+kubectl scale --current-replicas=2 --replicas=3 deployment/edge-microgateway-no-oauth
 ```
 
 #### Testing the deployment
@@ -261,18 +302,54 @@ curl -v http://xx.xxx.xxx.xxx:8000/httpbin -v
 {"error":"missing_authorization","error_description":"Missing Authorization header"}%
 ```
 
+##### Curl Commands
+You can use the following curl commands to test the microgateway.  
+
+```bash
+curl http://kubernetes_IP:8000/edgemicro_perftest/10kb -H "x-api-key:APIKEY" -i
+```
+
+Get access token
+```bash
+curl https://org-test.apigee.net/edgemicro-auth/token -d '{"client_id": "APIKEY","client_secret":"SECRET","grant_type": "client_credentials" }' -H "Content-Type: application/json"
+```
+
+```bash
+curl http://kubernetes_IP:8000/edgemicro_perftest/10kb -H "Authorization: Bearer VALID_JWT" -i
+```
+
 #### Delete the deployment and service
 The following command will delete all the components.  
-```
+```bash
 kubectl delete -f mgw-secret.yaml
+kubectl delete -f mgw-secret-no-oauth.yaml
 ```
 
 You can also execute
-```./k8scleanup.sh```
+```bash
+./k8scleanup.sh
+```
 
+### GKE Rollout a new revision
+This section describes how to perform a rolling update in GKE ([GKE rolling update docs](https://cloud.google.com/kubernetes-engine/docs/how-to/updating-apps)).  
 
+```
+kubectl apply -f mgw-secret-r2.yaml
+```
 
+#### Monitor the status of a rollout
+```
+kubectl rollout status deployment edge-microgateway
+```
+#### View the rollout history
+```
+kubectl rollout history deployment edge-microgateway
+```
 
+#### Undo a rollout
+```
+kubectl rollout undo deployments edge-microgateway
+```
 
 ### License
 Apache 2.0

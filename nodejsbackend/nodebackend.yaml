@@ -13,17 +13,22 @@ spec:
   type: LoadBalancer
 ---
 apiVersion: v1
-kind: Pod
+kind: ReplicationController
 metadata:
   name: nodejs-backend
-  labels:
-    app: nodejs-backend
 spec:
-  restartPolicy: Never
-  containers:
-    - name: nodejs-backend
-      image: gcr.io/YOUR_PROJECT_ID_HERE/nodejs-backend:latest
-      ports:
+  replicas: 1
+  selector:
+    app: nodejs-backend
+  template:
+    metadata:
+      name: nodejs-backend
+      labels:
+        app: nodejs-backend
+    spec:
+      containers:
+      - name: nodejs-backend
+        image: gcr.io/YOUR_PROJECT_ID_HERE/nodejs-backend:latest
+        ports:
         - containerPort: 8080
-
 ---
