@@ -86,7 +86,7 @@ All of this is controlled via the configuration yaml file. Generate the config y
 #### Custom plugins
 If the MG instance uses custom plugins, one way is to package those custom plugins as npm modules (private repo or public repo). Then the installation of MG can be done as:
 ```
-npm install -g edgemico plugin-1 plugin-2
+npm install -g edgemicro plugin-1 plugin-2
 ```
 
 #### A Sample configuration file
@@ -118,6 +118,50 @@ edgemicro:
 . omitted for brevity
 ```
 
+#### Configuration Files included
+There are several K8S configuration files included in this repo.
+
+* mgw-secret.yaml
+  * This is the default file and should be run first because it has all of the config to setup MG (i.e. secret, service and deployment).
+  * 1 CPU request and limit
+  * 512M memory
+  * 2 Edgemicro processes
+* mgw-secret-r2.yaml
+  * 2 CPU request and limit
+  * 1024M memory
+  * 2 Edgemicro processes
+* mgw-secret-no-auth.yaml
+  * I did not use this config file
+  * 1 CPU request and limit
+  * 256M memory
+  * this will start as many Edgemicro processes as available on the node.
+  * use a docker image that does not include the oauth plugin (pass through)
+* mgw-secret-pod.yaml
+  * I didn't use this file either. It contains an example of how to configure a pod directly as opposed to a deployment.
+  * It uses the default CPU request for your K8S cluster
+  * It uses the default memory for your K8S cluster
+  * this will start as many Edgemicro processes as available on the node.
+* mgw-secret-2cpu-1024m.yaml
+  * 2 CPU request and limit
+  * 1024M memory
+  * 2 Edgemicro processes
+* mgw-secret-2cpu-1024m-4k.yaml
+  * 2 CPU request and limit
+  * 1024M memory
+  * 2 Edgemicro processes
+  * 4000 max connections
+* mgw-secret-2cpu-1024m-4k-4emp.yaml
+  * 2 CPU request and limit
+  * 1024M memory
+  * 4 Edgemicro processes
+  * 4000 max connections
+* mgw-secret-3cpu-1024m-4k-3emp.yaml
+  * 3 CPU request and limit
+  * 1024M memory
+  * 3 Edgemicro processes
+  * 4000 max connections
+
+
 ### Deploying to Kubernetes (GKE)
 #### Set your project id
 ```
@@ -144,8 +188,19 @@ docker tag microgateway gcr.io/$PROJECT_ID/microgteway:latest
 You only need to do this if you created a separate Docker image that does not include the oauth plugin.  
 
 ```
-docker tag microgateway gcr.io/$PROJECT_ID/microgteway-no-oauth:latest
+docker tag microgateway gcr.io/$PROJECT_ID/microgateway-no-oauth:latest
 ```
+
+##### Tag the microgateway-4k Docker image
+You only need to do this if you created a separate Docker image. This image resets MG to allow 4k max connections.
+```
+max_connections: 4000
+```
+
+```
+docker tag microgateway gcr.io/$PROJECT_ID/microgateway-4k:latest
+```
+
 
 #### Convert Edge Microgateway credentials to base64
 Convert each of these values into base64. This will help store those credentials into k8s secrets.
@@ -166,7 +221,7 @@ In order for Kubernetes to start the MG container, it should be accessible via a
 
 ```
 gcloud docker -- push gcr.io/$PROJECT_ID/microgateway:latest
-
+gcloud docker -- push gcr.io/$PROJECT_ID/microgateway-4k:latest
 gcloud docker -- push gcr.io/$PROJECT_ID/microgateway-no-oauth:latest
 ```
 
@@ -333,8 +388,17 @@ You can also execute
 ### GKE Rollout a new revision
 This section describes how to perform a rolling update in GKE ([GKE rolling update docs](https://cloud.google.com/kubernetes-engine/docs/how-to/updating-apps)).  
 
+Execute the following commands one at a time to test/deploy different configurations of the MG pod.
+
 ```
 kubectl apply -f mgw-secret-r2.yaml
+kubectl apply -f mgw-secret-2cpu-1024m.yaml
+kubectl apply -f mgw-secret-2cpu-1024m-4k.yaml
+kubectl apply -f mgw-secret-2cpu-1024m-4k-4emp.yaml
+kubectl apply -f mgw-secret-3cpu-1024m-4k-3emp.yaml
+kubectl apply -f mgw-secret-4cpu-1024m-4k-4emp.yaml
+kubectl apply -f mgw-secret-7cpu-1024m-4k-7emp.yaml
+
 ```
 
 #### Monitor the status of a rollout
@@ -350,6 +414,11 @@ kubectl rollout history deployment edge-microgateway
 ```
 kubectl rollout undo deployments edge-microgateway
 ```
+
+# Copy files from GCP to local machine
+
+https://cloud.google.com/sdk/gcloud/reference/compute/scp
+
 
 ### License
 Apache 2.0
