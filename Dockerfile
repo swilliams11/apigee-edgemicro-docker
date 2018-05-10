@@ -11,7 +11,7 @@ ARG ENV=someenv
 
 RUN groupadd microgateway
 RUN useradd microgateway -g microgateway -m -d /home/microgateway
-RUN npm install -g edgemicro
+RUN npm install -g edgemicro@latest
 RUN su - microgateway -c "edgemicro init"
 COPY $ORG-$ENV-config.yaml /home/microgateway/.edgemicro
 RUN chown microgateway:microgateway /home/microgateway/.edgemicro/*
