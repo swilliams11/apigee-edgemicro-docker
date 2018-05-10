@@ -37,6 +37,15 @@ This runs both 10kb, and 100kb requests in parallel
 cd edgemicroproxy/microproxy/tests/gatling
 mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTestAllRequests
  ```
+The following tests can be run:
+```
+mvn gatling:test -Dgatling.simulationClass=microgateway.TargetServerDirectAllRequests
+mvn gatling:test -Dgatling.simulationClass=microgateway.TargetServerDirect10kb
+mvn gatling:test -Dgatling.simulationClass=microgateway.TargetServerDirect100kb
+mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTestAllRequests
+mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTest10kbOnly
+mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTest100kbOnly
+```
 
 or simply:
 
@@ -49,7 +58,7 @@ mvn gatling:test
 cd edgemicroproxy/microproxy/tests/gatling
 mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTest10kbOnly
  ```
- 
+
 ## Run 100kb scenario only
 ```
 mvn gatling:test -Dgatling.simulationClass=microgateway.EdgeMicrogatewayPerformanceTest100kbOnly
