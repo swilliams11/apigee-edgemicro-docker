@@ -2,7 +2,7 @@
 
 echo "Started entry point" >> /tmp/entrypoint.log
 
-su - microgateway -m -c "cd /home/microgateway && edgemicro start" 
+su - microgateway -m -c "cd /home/microgateway && edgemicro start -c /home/microgateway/.edgemicro"
 
 # SIGUSR1-handler
 my_handler() {
@@ -26,4 +26,3 @@ while true
 do
         tail -f /dev/null & wait ${!}
 done
-
