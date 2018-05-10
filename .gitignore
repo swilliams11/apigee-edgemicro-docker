@@ -1,2 +1,8 @@
 w*-test-config.yaml
 account.json
+.terraform
+.terraform.*
+google_compute_engine.pub
+google_compute_engine
+terraform.tfstate
+terraform.tfstate.backup
