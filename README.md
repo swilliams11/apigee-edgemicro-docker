@@ -37,7 +37,7 @@ At the end of a successful configuration, you will see a file in the ~/.edgemicr
 ### Getting Started
 1. Clone the project
 ```
-git clone https://github.com/srinandan/apigee-edgemicro-docker.git
+git clone https://github.com/swilliams11/apigee-edgemicro-docker.git
 ```
 
 2. Switch directory
