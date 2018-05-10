@@ -48,6 +48,10 @@ cd nodejsbackend
 npm start
 ```
 
+## Update Deployment
+ ```
+ kubectl apply -f nodebackend.yaml
+ ```
 
 ## Test
 ```
