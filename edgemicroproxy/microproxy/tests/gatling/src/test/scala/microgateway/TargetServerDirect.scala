@@ -27,6 +27,7 @@ object TargetServerDirect extends Simulation {
   //configure the http object base url generically.
   val httpConf = http
     .baseURL("http://") // Here is the root for all relative URLs
+    .disableCaching
 
 
   object TargetServerDirect10kb {

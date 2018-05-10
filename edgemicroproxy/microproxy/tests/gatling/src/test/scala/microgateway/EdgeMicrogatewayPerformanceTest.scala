@@ -37,6 +37,7 @@ object EdgeMicrogatewayPerformanceTest extends Simulation {
   //configure the http object base url generically.
   val httpConf = http
     .baseURL("http://") // Here is the root for all relative URLs
+    .disableCaching
 
   /**
     * This object sends two requests to random endpoints.

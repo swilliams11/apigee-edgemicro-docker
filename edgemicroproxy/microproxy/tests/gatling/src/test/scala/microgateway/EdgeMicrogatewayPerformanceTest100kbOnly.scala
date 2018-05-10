@@ -13,6 +13,7 @@ class EdgeMicrogatewayPerformanceTest100kbOnly extends Simulation {
   //configure the http object base url generically.
   val httpConf = http
     .baseURL("http://") // Here is the root for all relative URLs
+    .disableCaching
 
   val scn100kbAccessToken = scenario("100kb Performance Test Scenario").exec(PerformanceTest100kbAccessToken.get100KBRequest) // A scenario is a chain of requests and pauses
 

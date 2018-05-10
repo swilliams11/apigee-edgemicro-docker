@@ -12,6 +12,7 @@ class TargetServerDirect100kb extends Simulation {
   //configure the http object base url generically.
   val httpConf = http
     .baseURL("http://") // Here is the root for all relative URLs
+    .disableCaching
 
   //val scn1 = scenario("Direct To Target Server - 10kb Performance Test Scenario").exec(TargetServerDirect10kb.getRequest) // A scenario is a chain of requests and pauses
   val scn2 = scenario("Direct To Target Server - 100kb Performance Test Scenario").exec(TargetServerDirect100kb.getRequest) // A scenario is a chain of requests and pauses
